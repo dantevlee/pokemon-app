@@ -1,16 +1,23 @@
 import React from "react";
-
-const Card = () => {
-  
-  return(
+const Card = ({ pokemon, loading, infoPokemon }) => {
+  return (
     <React.Fragment>
-      <div className="card">
-        <h2>1</h2>
-        
-      </div>
+      {loading ? (
+        <h1>Loading...</h1>
+      ) : (
+        pokemon.map(p => {
+          return (
+            <>
+              <div className="card" key={p.id} onClick={()=>infoPokemon(p)}>
+                <h2>{p.id}</h2>
+                <img src={p.sprites.front_default} alt="" />
+                <h2>{p.name}</h2>
+              </div>
+            </>
+          );
+        })
+      )}
     </React.Fragment>
-  )
-}
-
+  );
+};
 export default Card;
-
