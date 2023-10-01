@@ -21,6 +21,7 @@ const Main = () => {
   const setAttributes = async (attributes) => {
     for (const attribute of attributes) {
       const attributeUrl = attribute.url;
+      attribute.id = await getId(attributeUrl);
       attribute.image = await getImage(attributeUrl);
       attribute.weight = await getWeight(attributeUrl);
       attribute.height = await getHeight(attributeUrl);
@@ -29,6 +30,11 @@ const Main = () => {
     }
 
     setPokemon(attributes);
+  };
+
+  const getId= async (id) => {
+    const response = await axios.get(id);
+    return response.data.id;
   };
 
   const getImage = async (imageUrl) => {
@@ -94,22 +100,24 @@ const Main = () => {
     <React.Fragment>
       <div>
         <h1>
-          <center>PokeData</center>
+          <center>
+            <p className=".text-danger font-weight-bold">PokeData</p>
+          </center>
         </h1>
         <Search search={handleSearch} />
         {loading && <div>Loading...</div>}
         <Table pokemon={pokemon} />
         <ReactPaginate
-           pageCount={pageCount}
-           pageRangeDisplayed={3} // Adjust this value
-           marginPagesDisplayed={1}
-           onPageChange={({ selected }) => {
-             handlePageChange(selected);
-           }}
-           containerClassName="pagination justify-content-center"
-           pageClassName="page-item"
-           pageLinkClassName="page-link"
-           activeClassName="active"
+          pageCount={pageCount}
+          pageRangeDisplayed={3} // Adjust this value
+          marginPagesDisplayed={1}
+          onPageChange={({ selected }) => {
+            handlePageChange(selected);
+          }}
+          containerClassName="pagination justify-content-center"
+          pageClassName="page-item"
+          pageLinkClassName="page-link"
+          activeClassName="active"
         />
       </div>
     </React.Fragment>

@@ -4,6 +4,7 @@ const Table = ({pokemon}) => {
 
   const tBody = pokemon.map((p) => (
      <tr key={p.id}>
+      <td>{p.id}</td>
     <td><img src={p.image ? p.image : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png`}></img></td>
      <td>{p.name.toUpperCase()}</td>
      <td>{p.weight}lbs</td>
@@ -20,6 +21,7 @@ const Table = ({pokemon}) => {
         <table className="table table-sm table-bordered table-warning table-hover">
           <thead>
           <tr>
+          <th scope="col">ID</th>
           <th scope="col">Image</th>
           <th scope="col">Name</th>
           <th scope="col">Weight</th>

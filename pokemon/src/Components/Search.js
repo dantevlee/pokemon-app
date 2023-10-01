@@ -18,7 +18,7 @@ const Search = ({ search }) => {
             className="form-control mr-2"
             type="text"
             name="Pokemon"
-            placeholder="Search Pokemon..."
+            placeholder="Search Pokemon By Name Or ID.."
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
