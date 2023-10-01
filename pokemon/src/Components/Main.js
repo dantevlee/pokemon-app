@@ -14,14 +14,13 @@ const Main = () => {
       const numberOfPages = calculatePages(res.data.count);
       setPageCount(numberOfPages);
       setAttributes(res.data.results);
+      setLoading(false);
     });
-    setLoading(false);
   }, []);
 
   const setAttributes = async (attributes) => {
     for (const attribute of attributes) {
       const attributeUrl = attribute.url;
-      attribute.id = await getId(attributeUrl);
       attribute.image = await getImage(attributeUrl);
       attribute.weight = await getWeight(attributeUrl);
       attribute.height = await getHeight(attributeUrl);
@@ -30,11 +29,6 @@ const Main = () => {
     }
 
     setPokemon(attributes);
-  };
-
-  const getId= async (id) => {
-    const response = await axios.get(id);
-    return response.data.id;
   };
 
   const getImage = async (imageUrl) => {
@@ -65,7 +59,7 @@ const Main = () => {
   };
 
   const calculatePages = (count) => {
-    return Math.ceil(count / 21.75);
+    return Math.ceil(count / 19.9);
   };
 
   const handlePageChange = (offset) => {
@@ -101,15 +95,15 @@ const Main = () => {
       <div>
         <h1>
           <center>
-            <p className=".text-danger font-weight-bold">PokeData</p>
+            <p className="text-danger font-weight-bold">Poke Data</p>
           </center>
         </h1>
         <Search search={handleSearch} />
-        {loading && <div>Loading...</div>}
-        <Table pokemon={pokemon} />
+        {loading && <h1>Loading..</h1>}
+        {!loading && <Table pokemon={pokemon} />}
         <ReactPaginate
           pageCount={pageCount}
-          pageRangeDisplayed={3} // Adjust this value
+          pageRangeDisplayed={10} // Adjust this value
           marginPagesDisplayed={1}
           onPageChange={({ selected }) => {
             handlePageChange(selected);

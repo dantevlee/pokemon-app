@@ -11,7 +11,7 @@ const Search = ({ search }) => {
   };
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 d-flex justify-content-center align-items-center">
       <form onSubmit={handleSubmit}>
         <div className="d-flex">
           <input
@@ -21,6 +21,7 @@ const Search = ({ search }) => {
             placeholder="Search Pokemon By Name Or ID.."
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            style={{ width: "1000px" }} 
           />
           <button
             className="btn btn-primary"

@@ -3,8 +3,7 @@ import React from "react"
 const Table = ({pokemon}) => {
 
   const tBody = pokemon.map((p) => (
-     <tr key={p.id}>
-      <td>{p.id}</td>
+    <tr key={p.id}>
     <td><img src={p.image ? p.image : `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png`}></img></td>
      <td>{p.name.toUpperCase()}</td>
      <td>{p.weight}lbs</td>
@@ -18,10 +17,9 @@ const Table = ({pokemon}) => {
     <React.Fragment>
       <div className="container">
         <div className="row">
-        <table className="table table-sm table-bordered table-warning table-hover">
+        <table className="table table-dark table-sm table-bordered table-warning table-hover">
           <thead>
           <tr>
-          <th scope="col">ID</th>
           <th scope="col">Image</th>
           <th scope="col">Name</th>
           <th scope="col">Weight</th>
