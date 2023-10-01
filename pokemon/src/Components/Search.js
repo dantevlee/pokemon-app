@@ -7,18 +7,11 @@ const Search = ({ search }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     search(input);
-  };
-
-  const handleInputChange = (e) => {
-    setInput(e.target.value);
-
-    if (!e.target.value.trim()) {
-      search(""); // Pass an empty string to trigger a reset
-    }
+    setInput('')
   };
 
   return (
-    <div className="mb-4"> {/* Added margin-bottom for better spacing */}
+    <div className="mb-4">
       <form onSubmit={handleSubmit}>
         <div className="d-flex">
           <input
@@ -26,7 +19,8 @@ const Search = ({ search }) => {
             type="text"
             name="Pokemon"
             placeholder="Search Pokemon..."
-            onChange={handleInputChange}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
           />
           <button
             className="btn btn-primary"

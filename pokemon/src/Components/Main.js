@@ -1,116 +1,116 @@
 import React, { useState, useEffect } from "react";
-import Card from "./Card";
-import Info from "./Info";
+import ReactPaginate from "react-paginate";
 import Search from "./Search";
 import axios from "axios";
+import Table from "./Table";
 
 const Main = () => {
-  const [pokeData, setPokeData] = useState([]);
+  const [pokemon, setPokemon] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [url, setUrl] = useState("https://pokeapi.co/api/v2/pokemon/");
-  const [nextUrl, setNextUrl] = useState();
-  const [prevUrl, setPrevUrl] = useState();
-  const [pokeDex, setPokeDex] = useState();
-  const [searchInput, setSearchInput] = useState('');
+  const [pageCount, setPageCount] = useState(0);
 
-  const pokeFun = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(url);
-      setNextUrl(res.data.next);
-      setPrevUrl(res.data.previous);
-
-      const newPokemonData = await getPokemon(res.data.results);
-      setPokeData((prevData) => {
-        const existingIds = new Set(prevData.map((p) => p.id));
-        const filteredNewPokemon = newPokemonData.filter(
-          (p) => !existingIds.has(p.id)
-        );
-
-        const updatedData = [...prevData, ...filteredNewPokemon];
-        updatedData.sort((a, b) => (a.id > b.id ? 1 : -1));
-        return updatedData;
-      });
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getPokemon = async (res) => {
-    const promises = res.map(async (item) => {
-      const result = await axios.get(item.url);
-      return result.data;
+  useEffect(() => {
+    axios.get("https://pokeapi.co/api/v2/pokemon/").then((res) => {
+      const numberOfPages = calculatePages(res.data.count);
+      setPageCount(numberOfPages);
+      setAttributes(res.data.results);
     });
+    setLoading(false);
+  }, []);
 
-    return Promise.all(promises);
+  const setAttributes = async (attributes) => {
+    for (const attribute of attributes) {
+      const attributeUrl = attribute.url;
+      attribute.image = await getImage(attributeUrl);
+      attribute.weight = await getWeight(attributeUrl);
+      attribute.height = await getHeight(attributeUrl);
+      attribute.abilities = await getMoves(attributeUrl);
+      attribute.types = await getType(attributeUrl);
+    }
+
+    setPokemon(attributes);
   };
 
-  useEffect(() => {
-    pokeFun();
-  }, [url]);
+  const getImage = async (imageUrl) => {
+    const response = await axios.get(imageUrl);
+    return response.data.sprites.front_default;
+  };
 
-  useEffect(() => {
-    if (!searchInput.trim()) {
-     pokeFun()
-    }
-  }, [searchInput]);
+  const getWeight = async (weight) => {
+    const response = await axios.get(weight);
+    return response.data.weight;
+  };
+
+  const getHeight = async (height) => {
+    const response = await axios.get(height);
+    return response.data.height;
+  };
+
+  const getMoves = async (abiltiy) => {
+    const response = await axios.get(abiltiy);
+    const abilities = response.data.abilities.map((a) => a.ability.name);
+    return abilities;
+  };
+
+  const getType = async (type) => {
+    const response = await axios.get(type);
+    const types = response.data.types.map((t) => t.type.name);
+    return types;
+  };
+
+  const calculatePages = (count) => {
+    return Math.ceil(count / 21.75);
+  };
+
+  const handlePageChange = (offset) => {
+    const selectedPage = offset * 20;
+    axios
+      .get(`https://pokeapi.co/api/v2/pokemon?offset=${selectedPage}&limit=20`)
+      .then((res) => setAttributes(res.data.results));
+  };
 
   const handleSearch = async (search) => {
-    setSearchInput(search);
     if (!search.trim()) {
       return;
     }
-    try {
-      const res = await axios.get(
-        `https://pokeapi.co/api/v2/pokemon/${search.toLowerCase()}`
-      );
-      if (res.data) {
-        setPokeData([res.data]);
-      } 
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
+    const response = await axios.get(
+      `https://pokeapi.co/api/v2/pokemon/${search}`
+    );
+
+    const searchedPokemon = {
+      id: response.data.id,
+      name: response.data.name,
+      image: response.data.sprites.front_default,
+      weight: response.data.weight,
+      height: response.data.height,
+      abilities: response.data.abilities.map((a) => a.ability.name),
+      types: response.data.types.map((t) => t.type.name),
+    };
+
+    setPokemon([searchedPokemon]);
   };
 
   return (
     <React.Fragment>
-      {loading && <div>Loading...</div>}
-      <div className="container">
+      <div>
+        <h1>
+          <center>PokeData</center>
+        </h1>
         <Search search={handleSearch} />
-        <div className="left-content">
-          <Card
-            pokemon={pokeData}
-            loading={loading}
-            infoPokemon={(poke) => setPokeDex(poke)}
-          />
-          <div className="btn-group">
-            {prevUrl && pokeData.length > 1 && (
-              <button
-                onClick={() => {
-                  setPokeData([]);
-                  setUrl(prevUrl);
-                }}
-              >
-                Previous
-              </button>
-            )}
-            {nextUrl && pokeData.length > 1 && (
-              <button
-                onClick={() => {
-                  setPokeData([]);
-                  setUrl(nextUrl);
-                }}
-              >
-                Next
-              </button>
-            )}
-          </div>
-        </div>
-        <div className="right-content">
-          <Info data={pokeDex} />
-        </div>
+        {loading && <div>Loading...</div>}
+        <Table pokemon={pokemon} />
+        <ReactPaginate
+           pageCount={pageCount}
+           pageRangeDisplayed={3} // Adjust this value
+           marginPagesDisplayed={1}
+           onPageChange={({ selected }) => {
+             handlePageChange(selected);
+           }}
+           containerClassName="pagination justify-content-center"
+           pageClassName="page-item"
+           pageLinkClassName="page-link"
+           activeClassName="active"
+        />
       </div>
     </React.Fragment>
   );
