@@ -1,19 +1,24 @@
+
 import React, { useState, useEffect } from "react";
 import ReactPaginate from "react-paginate";
 import Search from "./Search";
 import axios from "axios";
 import Table from "./Table";
+import { Alert } from "react-bootstrap";
 
 const Main = () => {
   const [pokemon, setPokemon] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pageCount, setPageCount] = useState(0);
+  const [visitCount, setVisitCount] = useState(1)
+  const [isInitialLoad, setIsInitialLoad] = useState(false);
 
   useEffect(() => {
     axios.get("https://pokeapi.co/api/v2/pokemon/").then((res) => {
       const numberOfPages = calculatePages(res.data.count);
       setPageCount(numberOfPages);
       setAttributes(res.data.results);
+      setIsInitialLoad(false)
       setLoading(false);
     });
   }, []);
@@ -63,35 +68,62 @@ const Main = () => {
   };
 
   const handlePageChange = (offset) => {
+    if (visitCount === 1){
+      setIsInitialLoad(true)
+    }
     const selectedPage = offset * 20;
     axios
       .get(`https://pokeapi.co/api/v2/pokemon?offset=${selectedPage}&limit=20`)
       .then((res) => setAttributes(res.data.results));
+      setIsInitialLoad(false)
+      if(visitCount > 0){
+        setVisitCount(0)
+      }
   };
 
   const handleSearch = async (search) => {
+    if (visitCount === 1){
+      setIsInitialLoad(true)
+    }
     if (!search.trim()) {
       return;
     }
-    const response = await axios.get(
-      `https://pokeapi.co/api/v2/pokemon/${search}`
-    );
+    try {
+      const response = await axios.get(
+        `https://pokeapi.co/api/v2/pokemon/${search}`
+      );
+      const searchedPokemon = {
+        id: response.data.id,
+        name: response.data.name,
+        image: response.data.sprites.front_default,
+        weight: response.data.weight,
+        height: response.data.height,
+        abilities: response.data.abilities.map((a) => a.ability.name),
+        types: response.data.types.map((t) => t.type.name),
+      };
+      setPokemon([searchedPokemon]);
+      setIsInitialLoad(false)
+    } catch (error) {
+      return;
+    }
 
-    const searchedPokemon = {
-      id: response.data.id,
-      name: response.data.name,
-      image: response.data.sprites.front_default,
-      weight: response.data.weight,
-      height: response.data.height,
-      abilities: response.data.abilities.map((a) => a.ability.name),
-      types: response.data.types.map((t) => t.type.name),
-    };
-
-    setPokemon([searchedPokemon]);
+    if(visitCount > 0){
+      setVisitCount(0)
+    }
   };
+
+  const removeNotification = () => {
+    setIsInitialLoad(false);
+    setVisitCount(0)
+  }
 
   return (
     <React.Fragment>
+        {isInitialLoad && (
+        <Alert variant="info" onClose={() => removeNotification()} dismissible>
+          This server is running on a free instance in the cloud that spins down if unused. It may take a few seconds for the first app initialization. Thank you for your patience!
+        </Alert>
+      )}
       <div>
         <h1>
           <center>
