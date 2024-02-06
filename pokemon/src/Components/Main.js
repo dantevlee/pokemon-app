@@ -14,6 +14,9 @@ const Main = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(false);
 
   useEffect(() => {
+    if (visitCount === 1){
+      setIsInitialLoad(true)
+    }
     axios.get("https://pokeapi.co/api/v2/pokemon/").then((res) => {
       const numberOfPages = calculatePages(res.data.count);
       setPageCount(numberOfPages);
